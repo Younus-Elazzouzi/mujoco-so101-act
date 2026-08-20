@@ -1,6 +1,16 @@
+import argparse
+
 import mujoco
 import mujoco.viewer
 from so101_mujoco_utils import set_initial_pose, move_to_pose, hold_position
+from mujoco_video_recorder import MujocoVideoRecorder
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--record', action='store_true', help='Save the run as an MP4 video.')
+parser.add_argument('--output', default='recordings/mujoco_run.mp4', help='MP4 path used with --record.')
+parser.add_argument('--fps', type=int, default=30, help='Recording frame rate.')
+args = parser.parse_args()
 
 m = mujoco.MjModel.from_xml_path('model/scene.xml')
 d = mujoco.MjData(m)
@@ -25,13 +35,21 @@ desired_position = {
 
 set_initial_pose(d, starting_position)
 
-with mujoco.viewer.launch_passive(m, d) as viewer:
+recorder = MujocoVideoRecorder(m, args.output, fps=args.fps) if args.record else None
 
-  # Go to desired position
-  move_to_pose(m, d, viewer, desired_position, 2.0)
-  
-  # Hold Position
-  hold_position(m, d, viewer, 2.0)
-  
-  # Return to starting
-  move_to_pose(m, d, viewer, starting_position, 2.0)
+try:
+  with mujoco.viewer.launch_passive(m, d) as viewer:
+    capture_frame = recorder.capture if recorder else None
+
+    # Go to desired position
+    move_to_pose(m, d, viewer, desired_position, 2.0, capture_frame)
+
+    # Hold Position
+    hold_position(m, d, viewer, 2.0, capture_frame)
+
+    # Return to starting
+    move_to_pose(m, d, viewer, starting_position, 2.0, capture_frame)
+finally:
+  if recorder:
+    recorder.close()
+    print(f'Recording saved to {args.output}')

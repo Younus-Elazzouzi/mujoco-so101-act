@@ -29,7 +29,7 @@ def send_position_command(d, position_dict):
     pos = convert_to_list(position_dict)
     d.ctrl = pos
 
-def move_to_pose(m, d, viewer, desired_position, duration):
+def move_to_pose(m, d, viewer, desired_position, duration, frame_callback=None):
     start_time = time.time()
     starting_pose = d.qpos.copy()
     starting_pose = convert_to_dictionary(starting_pose)
@@ -52,11 +52,13 @@ def move_to_pose(m, d, viewer, desired_position, duration):
         # Send command
         send_position_command(d, position_dict)
         mujoco.mj_step(m, d)
+        if frame_callback:
+            frame_callback(d)
         
         # Pick up changes to the physics state, apply perturbations, update options from GUI.
         viewer.sync()
     
-def hold_position(m, d, viewer, duration):
+def hold_position(m, d, viewer, duration, frame_callback=None):
     current_pos = d.qpos.copy()
     current_pos_dict = convert_to_dictionary(current_pos)
     
@@ -67,4 +69,6 @@ def hold_position(m, d, viewer, duration):
             break
         send_position_command(d, current_pos_dict)
         mujoco.mj_step(m, d)
+        if frame_callback:
+            frame_callback(d)
         viewer.sync()
