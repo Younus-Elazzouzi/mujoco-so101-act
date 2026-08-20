@@ -1,0 +1,2 @@
+mujoco==3.11.0
+lerobot==0.6.1
