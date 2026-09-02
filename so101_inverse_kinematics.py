@@ -1,4 +1,5 @@
 import numpy as np
+from so101_forward_kinematics import get_g45, get_g5t
 
 def get_inverse_kinematics(target_position, target_orientation):
     "Geometric appraoch specific to the so-101 arms"
@@ -22,3 +23,11 @@ def get_inverse_kinematics(target_position, target_orientation):
     joint_config['shoulder_pan'] = -theta_1
 
     return joint_config
+
+def get_wrist_flex_position(target_position):
+    gwt = np.block([[np.identity(3), np.array(target_position).reshape(3,1)], [0, 0, 0, 1]])
+    g4t = get_g45(0) @ get_g5t()
+    gw4 = gwt @ np.linalg.inv(g4t)
+    wrist_flex_position = gw4[0:3, 3]
+    wrist_flex_orientation = gw4[0:3, 0:3]
+    return wrist_flex_position, wrist_flex_orientation
