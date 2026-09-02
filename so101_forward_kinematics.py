@@ -58,7 +58,7 @@ def get_g45(theta5_deg):
 
 def get_g5t():
     displacement = (0.0, 0.0, -0.1034)
-    rotation = Rx(90) @ Rz(270)
+    rotation = Rx(0) # no rotation
     pose = np.block([[rotation, np.array(displacement).reshape(3,1)], [0, 0, 0, 1]])
     return pose
 
