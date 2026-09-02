@@ -45,7 +45,7 @@ with mujoco.viewer.launch_passive(m, d) as viewer:
   
   # First send the robot to a higher position with the gripper open
   joint_configuration = get_inverse_kinematics(desired_position, viewer)
-  move_to_pose(m, d, viewer, joint_configuration, 1.0)
+  move_to_pose(m, d, viewer, joint_configuration, 2.0)
   
   # Hold position for 10 seconds
   hold_position(m, d, viewer, 10.0)
