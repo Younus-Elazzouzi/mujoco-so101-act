@@ -35,6 +35,14 @@ def get_inverse_kinematics(target_position, target_orientation):
 
     joint_config['elbow_flex'] = np.rad2deg(theta_3)
 
+    # solve for theta_2
+    phi_3 = np.arctan(x_3 / (z_3 - a_1))
+    phi_1 = np.arccos((a_2**2 + r**2 - a_3**2) / (2*a_2*r))
+    theta_2 = phi_3 - phi_1
+
+    joint_config['shoulder_lift'] = np.rad2deg(theta_2)
+
+
 
     return joint_config
 
