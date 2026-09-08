@@ -22,6 +22,20 @@ def get_inverse_kinematics(target_position, target_orientation):
     
     joint_config['shoulder_pan'] = -theta_1
 
+    # solve for theta_3
+    a_1 = 0.0542 + 0.0624
+    a_2 = 0.11257
+    a_3 = 0.1349
+    wrist_flex_position, _ = get_wrist_flex_position(target_position)
+    x_3, _, z_3 = wrist_flex_position
+
+    r = np.sqrt(x_3**2 + (z_3 - a_1)**2)
+    phi_2 = np.arccos((a_2**2 + a_3**2 - r**2) / (2*a_2*a_3) )
+    theta_3 = np.pi - phi_2
+
+    joint_config['elbow_flex'] = np.rad2deg(theta_3)
+
+
     return joint_config
 
 def get_wrist_flex_position(target_position):
