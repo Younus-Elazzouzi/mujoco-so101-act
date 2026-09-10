@@ -1,5 +1,5 @@
 import numpy as np
-from so101_forward_kinematics import get_g45, get_g5t
+from so101_forward_kinematics import *
 
 def get_inverse_kinematics(target_position, target_orientation):
     "Geometric appraoch specific to the so-101 arms"
@@ -42,6 +42,22 @@ def get_inverse_kinematics(target_position, target_orientation):
 
     joint_config['shoulder_lift'] = np.rad2deg(theta_2)
 
+    # solve for theta_4
+    gw1 = get_gw1(joint_config['shoulder_pan'])
+    g12 = get_g12(joint_config['shoulder_lift'])
+    g23 = get_g23(joint_config['elbow_flex'])
+    g34 = get_g34(joint_config['wrist_flex'])
+    gw4 = gw1 @ g12 @ g23 @ g34
+    current_wrist_orientation = gw4[0:3, 0:3]
+
+    _, desired_wrist_orientation = get_wrist_flex_position(target_position)
+    
+    z_x_current, z_y_current, _ = current_wrist_orientation[2]
+    z_x_desired, z_y_desired, _ = desired_wrist_orientation[2]
+
+    theta_4 = np.arctan2(z_y_current, z_x_current) - np.arctan2(z_y_desired, z_x_desired) #! why??
+
+    joint_config['wrist_flex'] = np.rad2deg(theta_4)
 
 
     return joint_config
