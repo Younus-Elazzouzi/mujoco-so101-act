@@ -59,6 +59,9 @@ def get_inverse_kinematics(target_position, target_orientation):
 
     joint_config['wrist_flex'] = np.rad2deg(theta_4)
 
+    # solve for theta_5
+    theta_5 = joint_config['shoulder_pan']
+    joint_config['wrist_roll'] = theta_5
 
     return joint_config
 
