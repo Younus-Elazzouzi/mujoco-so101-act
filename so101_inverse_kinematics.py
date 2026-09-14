@@ -25,8 +25,10 @@ def get_inverse_kinematics(target_position, target_orientation):
     a_1 = 0.0542 + 0.0624
     a_2 = 0.11257
     a_3 = 0.1349
+    offset = 0.0388353 + 0.0303992 + 0.028
     wrist_flex_position, _ = get_wrist_flex_position(target_position)
-    x_3, _, z_3 = wrist_flex_position
+    x, y, z_3 = wrist_flex_position
+    x_3 = np.sqrt(x**2 + y**2) - offset
 
     r = np.sqrt(x_3**2 + (z_3 - a_1)**2)
     phi_2 = np.arccos((a_2**2 + a_3**2 - r**2) / (2*a_2*a_3) )
