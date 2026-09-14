@@ -15,12 +15,11 @@ def get_inverse_kinematics(target_position, target_orientation):
     }
 
     # solve for theta_1
-    x_des , y_des ,_ = target_position
+    y_des, x_des, _ = target_position
     offset = 0.0388353
-    a = np.atan2(y_des - offset, x_des)
-    theta_1 = np.rad2deg(np.pi/2 - a)
+    theta_1 = np.arctan2(x_des, y_des - offset)
     
-    joint_config['shoulder_pan'] = -theta_1
+    joint_config['shoulder_pan'] = np.rad2deg(-theta_1)
 
     # solve for theta_3
     a_1 = 0.0542 + 0.0624
