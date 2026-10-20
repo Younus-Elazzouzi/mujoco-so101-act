@@ -34,7 +34,7 @@ def get_gw1(theta1_deg):
 
 def get_g12(theta2_deg):
     displacement = (-0.0303992, 0.0, -0.0542)
-    rotation = Ry(270) @ Rx(270) @ Rz(theta2_deg)
+    rotation = Rz(-90) @ Ry(-90) @ Rz(theta2_deg)
     pose = np.block([[rotation, np.array(displacement).reshape(3,1)], [0, 0, 0, 1]])
     return pose
 
@@ -46,7 +46,7 @@ def get_g23(theta3_deg):
 
 def get_g34(theta4_deg):
     displacement = (-0.1349, 0.0, 0.0)
-    rotation = Rz(270) @ Rz(theta4_deg)
+    rotation = Rz(-90) @ Rz(theta4_deg)
     pose = np.block([[rotation, np.array(displacement).reshape(3,1)], [0, 0, 0, 1]])
     return pose
 
@@ -57,8 +57,8 @@ def get_g45(theta5_deg):
     return pose
 
 def get_g5t():
-    displacement = (0.0, 0.0, -0.1034)
-    rotation = Rx(0) # no rotation
+    displacement = (-0.0075, 0.0, -0.095)
+    rotation = np.identity(3) # no rotation
     pose = np.block([[rotation, np.array(displacement).reshape(3,1)], [0, 0, 0, 1]])
     return pose
 
