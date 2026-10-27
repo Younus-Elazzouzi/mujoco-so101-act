@@ -21,27 +21,40 @@ def get_inverse_kinematics(target_position, target_orientation):
     
     joint_config['shoulder_pan'] = np.rad2deg(-theta_1)
 
-    # solve for theta_3
-    a_1 = 0.0542 + 0.0624
-    a_2 = 0.11257
-    a_3 = 0.1349
-    offset = 0.0388353 + 0.0303992 + 0.028
+    # solve for theta_2 and theta_3
     wrist_flex_position, _ = get_wrist_flex_position(target_position)
-    x, y, z_3 = wrist_flex_position
-    x_3 = np.sqrt(x**2 + y**2) - offset
+    wrist_flex_position = np.asarray(wrist_flex_position, dtype=float).reshape(3)
 
-    r = np.sqrt(x_3**2 + (z_3 - a_1)**2)
-    phi_2 = np.arccos((a_2**2 + a_3**2 - r**2) / (2*a_2*a_3) )
-    theta_3 = np.pi/2 - phi_2
+    gw2_zero = get_gw1(joint_config["shoulder_pan"]) @ get_g12(0.0)
+    p2 = gw2_zero[:3, :3].T @ (wrist_flex_position - gw2_zero[:3, 3])
+    x, y = p2[:2]
 
-    joint_config['elbow_flex'] = np.rad2deg(theta_3)
+    l1 = np.hypot(0.11257, 0.028)
+    l2 = np.hypot(0.1349, 0.0052)
 
-    # solve for theta_2
-    phi_3 = np.arctan(x_3 / (z_3 - a_1))
-    phi_1 = np.arccos((a_2**2 + r**2 - a_3**2) / (2*a_2*r))
-    theta_2 = phi_3 - phi_1
+    r = np.hypot(x, y)
 
-    joint_config['shoulder_lift'] = np.rad2deg(theta_2)
+    if r < abs(l1 - l2) - 1e-9 or r > l1 + l2 + 1e-9:
+        raise ValueError("Target position is out of reach for the arm.")
+
+    cos_beta = (l1**2 + l2**2 - r**2) / (2 * l1 * l2)
+    cos_alpha = (r**2 + l1**2 - l2**2) / (2 * l1 * r)
+
+    beta = np.arccos(np.clip(cos_beta, -1.0, 1.0))
+    alpha = np.arccos(np.clip(cos_alpha, -1.0, 1.0))
+    gamma = np.arctan2(y, x)
+
+    phi1 = np.arctan2(-0.028, -0.11257)
+    phi2 = np.arctan2(0.0052, -0.1349)
+
+    theta_2 = gamma - alpha - phi1
+    theta_3 = np.pi - beta - (np.pi / 2 + phi2 - phi1)
+
+    theta_2 = (theta_2 + np.pi) % (2 * np.pi) - np.pi
+    theta_3 = (theta_3 + np.pi) % (2 * np.pi) - np.pi
+
+    joint_config["shoulder_lift"] = np.rad2deg(theta_2)
+    joint_config["elbow_flex"] = np.rad2deg(theta_3)
 
     # solve for theta_4
     gw1 = get_gw1(joint_config['shoulder_pan'])
