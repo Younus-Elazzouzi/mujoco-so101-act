@@ -1,7 +1,7 @@
 import numpy as np
 from so101_forward_kinematics import *
 
-def get_inverse_kinematics(target_position, target_orientation):
+def get_inverse_kinematics(target_position, target_orientation=np.eye(3)):
     "Geometric appraoch specific to the so-101 arms"
     
     # Initialize the joint configuration dictionary
@@ -86,3 +86,13 @@ def get_wrist_flex_position(target_position):
     wrist_flex_position = gw4[0:3, 3]
     wrist_flex_orientation = gw4[0:3, 0:3]
     return wrist_flex_position, wrist_flex_orientation
+
+BLOCK_WIDTH = 0.0285  # meters (1.125 inches)
+FIXED_JAW_OFFSET = 0.0079  # meters, from the wrist roll axis to the inner face of the fixed jaw
+
+def get_gripper_target(block_position):
+    "Offset from the center of the block so that the jaws surround the block"
+    gripper_target = list(block_position)
+    gripper_target[0] -= BLOCK_WIDTH / 2 - FIXED_JAW_OFFSET
+    gripper_target[2] -= BLOCK_WIDTH / 2
+    return gripper_target

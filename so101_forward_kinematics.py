@@ -57,8 +57,8 @@ def get_g45(theta5_deg):
     return pose
 
 def get_g5t():
-    displacement = (-0.0075, 0.0, -0.095)
-    rotation = np.identity(3) # no rotation
+    displacement = (0, 0, -0.1034)
+    rotation = np.eye(3)
     pose = np.block([[rotation, np.array(displacement).reshape(3,1)], [0, 0, 0, 1]])
     return pose
 
