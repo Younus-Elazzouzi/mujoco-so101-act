@@ -2,14 +2,14 @@ import time
 import mujoco
 import mujoco.viewer
 from so101_mujoco_utils import set_initial_pose, send_position_command, move_to_pose, hold_position
-from so101_inverse_kinematics import get_inverse_kinematics
+from so101_inverse_kinematics import get_inverse_kinematics, get_gripper_target
 import numpy as np
 
 m = mujoco.MjModel.from_xml_path('model/scene.xml')
 d = mujoco.MjData(m)
 
 # Helper Function to show a cube at a given position and orientation
-def show_cube(viewer, position, orientation, geom_num=0, halfwidth=0.013):
+def show_cube(viewer, position, orientation, geom_num=0, halfwidth=0.01425):
     mujoco.mjv_initGeom(
         viewer.user_scn.geoms[geom_num],
         type=mujoco.mjtGeom.mjGEOM_BOX, 
@@ -35,41 +35,38 @@ set_initial_pose(d, initial_config)
 send_position_command(d, initial_config)
 
 
-# Helper function to obtain random target position and yaw (rotation around the z-axis) from a given range 
+# Helper function to obtain a random target position from a given range 
 def get_random_position():
-    offset = 0.0388353 + 0.0303992 + 0.028 # so101 offset
-    + 0.05 # mujoco offset
-    x_pos_range = [offset, 0.25] #taken from workspace analysis
-    y_pos_range = [-0.2, 0.2] #taken from workspace analysis
-    yaw_range = [0, np.pi/2] #anything beyond 0 to 90 degrees is redundant due to symmetry of the cube
+    x_pos_range = [0.13, 0.262] #taken from workspace analysis
+    y_pos_range = [-0.162, 0.162] #taken from workspace analysis
     x = np.random.uniform(x_pos_range[0], x_pos_range[1])
     y = np.random.uniform(y_pos_range[0], y_pos_range[1])
-    yaw = np.random.uniform(yaw_range[0], yaw_range[1])
-    return [x, y, 0.014], yaw
+    return [x, y, 0.014]
 
 # Start simulation with mujoco viewer
 with mujoco.viewer.launch_passive(m, d) as viewer:
   
   # Pause for 10 seconds in order to make screen recording easier
-  time.sleep(2) 
+  time.sleep(10) 
   
   while viewer.is_running():
     
     for i in range(5):
-      desired_position, desired_yaw = get_random_position()
+      block_position = get_random_position()
       desired_orientation = np.eye(3)
 
       # Add a cylinder as a site for visualization
-      show_cube(viewer, desired_position, desired_orientation)
+      show_cube(viewer, block_position, desired_orientation)
+      
+      # Offset the target so that the jaws surround the cube
+      desired_position = get_gripper_target(block_position)
       
       # Get the inverse kinematics solution
       joint_configuration = get_inverse_kinematics(desired_position, desired_orientation)
 
       # Move the robot to the desired pose
-      move_to_pose(m, d, viewer, joint_configuration, 2.0)
+      move_to_pose(m, d, viewer, joint_configuration, 1.0)
       
       # Hold for two seconds for easy visualization
-      hold_position(m, d, viewer, 3.0)
+      hold_position(m, d, viewer, 2.0)
 
-    viewer.close()
-    viewer.sync()
