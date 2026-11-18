@@ -30,7 +30,7 @@ def get_inverse_kinematics(target_position, target_orientation=np.eye(3)):
     x, y = p2[:2]
 
     l1 = np.hypot(0.11257, 0.028)
-    l2 = np.hypot(0.1349, 0.0052)
+    l2 = np.hypot(0.1349, 0.0)
 
     r = np.hypot(x, y)
 
@@ -45,7 +45,7 @@ def get_inverse_kinematics(target_position, target_orientation=np.eye(3)):
     gamma = np.arctan2(y, x)
 
     phi1 = np.arctan2(-0.028, -0.11257)
-    phi2 = np.arctan2(0.0052, -0.1349)
+    phi2 = np.arctan2(0.0, -0.1349)
 
     theta_2 = gamma - alpha - phi1
     theta_3 = np.pi - beta - (np.pi / 2 + phi2 - phi1)
